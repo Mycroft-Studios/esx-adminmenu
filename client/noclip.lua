@@ -258,7 +258,7 @@ ToggleNoClip = function(state)
         PlaySoundFromEntity(-1, "CANCEL", PlayerPed, "HUD_LIQUOR_STORE_SOUNDSET", 0, 0)
     end
     
-    QBCore.Functions.Notify(IsNoClipping and "No-clip enabled" or "No-clip disabled")
+    ESX.ShowNotification(IsNoClipping and "No-clip enabled" or "No-clip disabled")
     SetUserRadioControlEnabled(not IsNoClipping)
    
     if IsNoClipping then
@@ -266,7 +266,7 @@ ToggleNoClip = function(state)
     end
 end
 
-RegisterNetEvent('qb-admin:client:ToggleNoClip', function()
+RegisterNetEvent('esx-admin:client:ToggleNoClip', function()
     ToggleNoClip(not IsNoClipping)
 end)
 

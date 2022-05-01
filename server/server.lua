@@ -1,8 +1,6 @@
--- Variables
-local QBCore = exports['qb-core']:GetCoreObject()
 local frozen = false
 local permissions = {
-    ['kill'] = 'god',
+    ['kill'] = 'admin',
     ['ban'] = 'admin',
     ['noclip'] = 'admin',
     ['kickall'] = 'admin',
@@ -10,19 +8,15 @@ local permissions = {
 }
 local players = {}
 
--- Get Dealers
-QBCore.Functions.CreateCallback('test:getdealers', function(source, cb)
-    cb(exports['qb-drugs']:GetDealers())
-end)
-
 -- Get Players
-QBCore.Functions.CreateCallback('test:getplayers', function(source, cb) -- WORKS
+ESX.RegisterServerCallback('test:getplayers', function(source, cb) -- WORKS
     cb(players)
 end)
 
-QBCore.Functions.CreateCallback('qb-admin:server:getrank', function(source, cb)
+ESX.RegisterServerCallback('esx-admin:server:getrank', function(source, cb)
     local src = source
-    if QBCore.Functions.HasPermission(src, 'god') or IsPlayerAceAllowed(src, 'command') then
+    local xPlayer = ESX.GetPlayerFromId(src)
+    if xPlayer.group == "admin" or IsPlayerAceAllowed(src, 'command') then
         cb(true)
     else
         cb(false)
@@ -41,28 +35,29 @@ end
 
 -- Events
 
-RegisterNetEvent('qb-admin:server:GetPlayersForBlips', function()
+RegisterNetEvent('esx-admin:server:GetPlayersForBlips', function()
     local src = source
-    TriggerClientEvent('qb-admin:client:Show', src, players)
+    TriggerClientEvent('esx-admin:client:Show', src, players)
 end)
 
-RegisterNetEvent('qb-admin:server:kill', function(player)
-    TriggerClientEvent('hospital:client:KillPlayer', player.id)
+RegisterNetEvent('esx-admin:server:kill', function(player)
+    TriggerClientEvent('esx:killPlayer', player.id)
 end)
 
-RegisterNetEvent('qb-admin:server:revive', function(player)
-    TriggerClientEvent('hospital:client:Revive', player.id)
+RegisterNetEvent('esx-admin:server:revive', function(player)
+    TriggerEvent('esx_ambulancejob:revive', player.id)
 end)
 
-RegisterNetEvent('qb-admin:server:kick', function(player, reason)
+RegisterNetEvent('esx-admin:server:kick', function(player, reason)
     local src = source
-    if QBCore.Functions.HasPermission(src, permissions['kick']) or IsPlayerAceAllowed(src, 'command')  then
-        TriggerEvent('qb-log:server:CreateLog', 'bans', 'Player Kicked', 'red', string.format('%s was kicked by %s for %s', GetPlayerName(player.id), GetPlayerName(src), reason), true)
-        DropPlayer(player.id, Lang:t("info.kicked_server") .. ':\n' .. reason .. '\n\n' .. Lang:t("info.check_discord") .. QBCore.Config.Server.Discord)
+    local xPlayer = ESX.GetPlayerFromId(src)
+    if xPlayer.group == "admin" or IsPlayerAceAllowed(src, 'command') then
+        -- TriggerEvent('qb-log:server:CreateLog', 'bans', 'Player Kicked', 'red', string.format('%s was kicked by %s for %s', GetPlayerName(player.id), GetPlayerName(src), reason), true)
+        DropPlayer(player.id, Lang:t("info.kicked_server") .. ':\n' .. reason .. '\n')
     end
 end)
 
-RegisterNetEvent('qb-admin:server:ban', function(player, time, reason)
+RegisterNetEvent('esx-admin:server:ban', function(player, time, reason)
     local src = source
     if QBCore.Functions.HasPermission(src, permissions['ban']) or IsPlayerAceAllowed(src, 'command') then
         local time = tonumber(time)
@@ -93,16 +88,16 @@ RegisterNetEvent('qb-admin:server:ban', function(player, time, reason)
     end
 end)
 
-RegisterNetEvent('qb-admin:server:spectate')
-AddEventHandler('qb-admin:server:spectate', function(player)
+RegisterNetEvent('esx-admin:server:spectate')
+AddEventHandler('esx-admin:server:spectate', function(player)
     local src = source
     local targetped = GetPlayerPed(player.id)
     local coords = GetEntityCoords(targetped)
-    TriggerClientEvent('qb-admin:client:spectate', src, player.id, coords)
+    TriggerClientEvent('esx-admin:client:spectate', src, player.id, coords)
 end)
 
-RegisterNetEvent('qb-admin:server:freeze')
-AddEventHandler('qb-admin:server:freeze', function(player)
+RegisterNetEvent('esx-admin:server:freeze')
+AddEventHandler('esx-admin:server:freeze', function(player)
     local target = GetPlayerPed(player.id)
     if not frozen then
         frozen = true
@@ -113,14 +108,14 @@ AddEventHandler('qb-admin:server:freeze', function(player)
     end
 end)
 
-RegisterNetEvent('qb-admin:server:goto', function(player)
+RegisterNetEvent('esx-admin:server:goto', function(player)
     local src = source
     local admin = GetPlayerPed(src)
     local coords = GetEntityCoords(GetPlayerPed(player.id))
     SetEntityCoords(admin, coords)
 end)
 
-RegisterNetEvent('qb-admin:server:intovehicle', function(player)
+RegisterNetEvent('esx-admin:server:intovehicle', function(player)
     local src = source
     local admin = GetPlayerPed(src)
     -- local coords = GetEntityCoords(GetPlayerPed(player.id))
@@ -136,15 +131,15 @@ RegisterNetEvent('qb-admin:server:intovehicle', function(player)
         end
         if seat ~= -1 then
             SetPedIntoVehicle(admin,vehicle,seat)
-            TriggerClientEvent('QBCore:Notify', src, Lang:t("sucess.entered_vehicle"), 'success', 5000)
+            -- TriggerClientEvent('QBCore:Notify', src, Lang:t("sucess.entered_vehicle"), 'success', 5000)
         else
-            TriggerClientEvent('QBCore:Notify', src, Lang:t("error.no_free_seats"), 'danger', 5000)
+            -- TriggerClientEvent('QBCore:Notify', src, Lang:t("error.no_free_seats"), 'danger', 5000)
         end
     end
 end)
 
 
-RegisterNetEvent('qb-admin:server:bring', function(player)
+RegisterNetEvent('esx-admin:server:bring', function(player)
     local src = source
     local admin = GetPlayerPed(src)
     local coords = GetEntityCoords(admin)
@@ -152,187 +147,161 @@ RegisterNetEvent('qb-admin:server:bring', function(player)
     SetEntityCoords(target, coords)
 end)
 
-RegisterNetEvent('qb-admin:server:inventory', function(player)
-    local src = source
-    TriggerClientEvent('qb-admin:client:inventory', src, player.id)
-end)
+-- RegisterNetEvent('esx-admin:server:cloth', function(player)
+--     TriggerClientEvent('qb-clothing:client:openMenu', player.id)
+-- end)
 
-RegisterNetEvent('qb-admin:server:cloth', function(player)
-    TriggerClientEvent('qb-clothing:client:openMenu', player.id)
-end)
-
-RegisterNetEvent('qb-admin:server:setPermissions', function(targetId, group)
+RegisterNetEvent('esx-admin:server:setPermissions', function(targetId, group)
     local src = source
-    if QBCore.Functions.HasPermission(src, 'god') or IsPlayerAceAllowed(src, 'command') then
-        QBCore.Functions.AddPermission(targetId, group[1].rank)
-        TriggerClientEvent('QBCore:Notify', targetId, Lang:t("info.rank_level")..group[1].label)
+    local xPlayer = ESX.GetPlayerFromId(src)
+    local TargetPlayer = ESX.GetPlayerFromId(targetId)
+    if xPlayer.group == "admin" or IsPlayerAceAllowed(src, 'command') then
+        TargetPlayer.setGroup(group[1].rank)
+        -- TriggerClientEvent('QBCore:Notify', targetId, Lang:t("info.rank_level")..group[1].label)
     end
 end)
 
-RegisterNetEvent('qb-admin:server:SendReport', function(name, targetSrc, msg)
+RegisterNetEvent('esx-admin:server:SendReport', function(name, targetSrc, msg)
     local src = source
-    if QBCore.Functions.HasPermission(src, 'admin') or IsPlayerAceAllowed(src, 'command') then
-        if QBCore.Functions.IsOptin(src) then
+       local xPlayer = ESX.GetPlayerFromId(src)
+    if xPlayer.group == "admin" or IsPlayerAceAllowed(src, 'command') then
             TriggerClientEvent('chat:addMessage', src, {
                 color = {255, 0, 0},
                 multiline = true,
                 args = {Lang:t("info.admin_report")..name..' ('..targetSrc..')', msg}
             })
-        end
     end
 end)
 
-RegisterNetEvent('qb-admin:server:Staffchat:addMessage', function(name, msg)
+RegisterNetEvent('esx-admin:server:Staffchat:addMessage', function(name, msg)
     local src = source
-    if QBCore.Functions.HasPermission(src, 'admin') or IsPlayerAceAllowed(src, 'command') then
-        if QBCore.Functions.IsOptin(src) then
+       local xPlayer = ESX.GetPlayerFromId(src)
+    if xPlayer.group == "admin" or IsPlayerAceAllowed(src, 'command') then
             TriggerClientEvent('chat:addMessage', src, {
                 color = {255, 0, 0},
                 multiline = true,
                 args = {Lang:t("info.staffchat")..name, msg}
             })
-        end
     end
 end)
 
-RegisterNetEvent('qb-admin:server:SaveCar', function(mods, vehicle, hash, plate)
-    local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    local result = MySQL.Sync.fetchAll('SELECT plate FROM player_vehicles WHERE plate = ?', { plate })
-    if result[1] == nil then
-        MySQL.Async.insert('INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, state) VALUES (?, ?, ?, ?, ?, ?, ?)', {
-            Player.PlayerData.license,
-            Player.PlayerData.citizenid,
-            vehicle.model,
-            vehicle.hash,
-            json.encode(mods),
-            plate,
-            0
-        })
-        TriggerClientEvent('QBCore:Notify', src, Lang:t("success.success_vehicle_owner"), 'success', 5000)
-    else
-        TriggerClientEvent('QBCore:Notify', src, Lang:t("error.failed_vehicle_owner"), 'error', 3000)
-    end
-end)
+-- RegisterNetEvent('esx-admin:server:SaveCar', function(mods, vehicle, hash, plate)
+--     local src = source
+--     local Player = ESX.GetPlayerFromId(src)
+--     local result = MySQL.Sync.fetchAll('SELECT plate FROM player_vehicles WHERE plate = ?', { plate })
+--     if result[1] == nil then
+--         MySQL.Async.insert('INSERT INTO player_vehicles (license, citizenid, vehicle, hash, mods, plate, state) VALUES (?, ?, ?, ?, ?, ?, ?)', {
+--             Player.PlayerData.license,
+--             Player.PlayerData.citizenid,
+--             vehicle.model,
+--             vehicle.hash,
+--             json.encode(mods),
+--             plate,
+--             0
+--         })
+--         -- TriggerClientEvent('QBCore:Notify', src, Lang:t("success.success_vehicle_owner"), 'success', 5000)
+--     else
+--         -- TriggerClientEvent('QBCore:Notify', src, Lang:t("error.failed_vehicle_owner"), 'error', 3000)
+--     end
+-- end)
 
 -- Commands
 
-QBCore.Commands.Add('blips', Lang:t("commands.blips_for_player"), {}, false, function(source)
+RegisterCommand('blips', function(source)
     local src = source
-    TriggerClientEvent('qb-admin:client:toggleBlips', src)
-end, 'admin')
+    TriggerClientEvent('esx-admin:client:toggleBlips', src)
+end, true)
 
-QBCore.Commands.Add('names', Lang:t("commands.player_name_overhead"), {}, false, function(source)
+RegisterCommand('names', function(source)
     local src = source
-    TriggerClientEvent('qb-admin:client:toggleNames', src)
-end, 'admin')
+    TriggerClientEvent('esx-admin:client:toggleNames', src)
+end, true)
 
-QBCore.Commands.Add('coords', Lang:t("commands.coords_dev_command"), {}, false, function(source)
+RegisterCommand('showcoords', function(source)
     local src = source
-    TriggerClientEvent('qb-admin:client:ToggleCoords', src)
-end, 'admin')
+    TriggerClientEvent('esx-admin:client:ToggleCoords', src)
+end, true)
 
-QBCore.Commands.Add('noclip', Lang:t("commands.toogle_noclip"), {}, false, function(source)
+RegisterCommand('menu:noclip', function(source)
     local src = source
-    TriggerClientEvent('qb-admin:client:ToggleNoClip', src)
-end, 'admin')
+    TriggerClientEvent('esx-admin:client:ToggleNoClip', src)
+end, true)
 
-QBCore.Commands.Add('admincar', Lang:t("commands.save_vehicle_garage"), {}, false, function(source, args)
-    local ply = QBCore.Functions.GetPlayer(source)
-    TriggerClientEvent('qb-admin:client:SaveCar', source)
-end, 'admin')
+RegisterCommand('admin', function(source, args)
+    TriggerClientEvent('esx-admin:client:openMenu', source)
+end, true)
 
-QBCore.Commands.Add('announce', Lang:t("commands.make_announcement"), {}, false, function(source, args)
-    local msg = table.concat(args, ' ')
-    if msg == '' then return end
-    TriggerClientEvent('chat:addMessage', -1, {
-        color = { 255, 0, 0},
-        multiline = true,
-        args = {"Announcement", msg}
-    })
-end, 'admin')
-
-QBCore.Commands.Add('admin', Lang:t("commands.open_admin"), {}, false, function(source, args)
-    TriggerClientEvent('qb-admin:client:openMenu', source)
-end, 'admin')
-
-QBCore.Commands.Add('report', Lang:t("info.admin_report"), {{name='message', help='Message'}}, true, function(source, args)
+RegisterCommand('report',function(source, args)
     local src = source
     local msg = table.concat(args, ' ')
-    local Player = QBCore.Functions.GetPlayer(source)
-    TriggerClientEvent('qb-admin:client:SendReport', -1, GetPlayerName(src), src, msg)
-    TriggerEvent('qb-log:server:CreateLog', 'report', 'Report', 'green', '**'..GetPlayerName(source)..'** (CitizenID: '..Player.PlayerData.citizenid..' | ID: '..source..') **Report:** ' ..msg, false)
+    local Player = ESX.GetPlayerFromId(source)
+    TriggerClientEvent('esx-admin:client:SendReport', -1, GetPlayerName(src), src, msg)
+    -- TriggerEvent('qb-log:server:CreateLog', 'report', 'Report', 'green', '**'..GetPlayerName(source)..'** (Identiuf: '..Player.PlayerData.citizenid..' | ID: '..source..') **Report:** ' ..msg, false)
 end)
 
-QBCore.Commands.Add('staffchat', Lang:t("commands.staffchat_message"), {{name='message', help='Message'}}, true, function(source, args)
+RegisterCommand('staffchat',function(source, args)
     local msg = table.concat(args, ' ')
-    TriggerClientEvent('qb-admin:client:SendStaffChat', -1, GetPlayerName(source), msg)
-end, 'admin')
+    TriggerClientEvent('esx-admin:client:SendStaffChat', -1, GetPlayerName(source), msg)
+end, true)
 
-QBCore.Commands.Add('givenuifocus', Lang:t("commands.nui_focus"), {{name='id', help='Player id'}, {name='focus', help='Set focus on/off'}, {name='mouse', help='Set mouse on/off'}}, true, function(source, args)
-    local playerid = tonumber(args[1])
-    local focus = args[2]
-    local mouse = args[3]
-    TriggerClientEvent('qb-admin:client:GiveNuiFocus', playerid, focus, mouse)
-end, 'admin')
-
-QBCore.Commands.Add('warn', Lang:t("commands.warn_a_player"), {{name='ID', help='Player'}, {name='Reason', help='Mention a reason'}}, true, function(source, args)
-    local targetPlayer = QBCore.Functions.GetPlayer(tonumber(args[1]))
-    local senderPlayer = QBCore.Functions.GetPlayer(source)
+RegisterCommand('warn", function(source, args)
+    local targetPlayer = ESX.GetPlayerFromId(tonumber(args[1]))
+    local senderPlayer = ESX.GetPlayerFromId(source)
     table.remove(args, 1)
     local msg = table.concat(args, ' ')
-    local myName = senderPlayer.PlayerData.name
+    local myName = senderPlayer.getName()
     local warnId = 'WARN-'..math.random(1111, 9999)
     if targetPlayer ~= nil then
-		TriggerClientEvent('chat:addMessage', targetPlayer.PlayerData.source, { args = { "SYSTEM", Lang:t("info.warning_chat_message")..GetPlayerName(source).."," .. Lang:t("info.reason") .. ": "..msg }, color = 255, 0, 0 })
-		TriggerClientEvent('chat:addMessage', source, { args = { "SYSTEM", Lang:t("info.warning_staff_message")..GetPlayerName(targetPlayer.PlayerData.source)..", for: "..msg }, color = 255, 0, 0 })
+		TriggerClientEvent('chat:addMessage', targetPlayer.source, { args = { "SYSTEM", Lang:t("info.warning_chat_message")..GetPlayerName(source).."," .. Lang:t("info.reason") .. ": "..msg }, color = 255, 0, 0 })
+		TriggerClientEvent('chat:addMessage', source, { args = { "SYSTEM", Lang:t("info.warning_staff_message")..GetPlayerName(targetPlayer.source)..", for: "..msg }, color = 255, 0, 0 })
         MySQL.Async.insert('INSERT INTO player_warns (senderIdentifier, targetIdentifier, reason, warnId) VALUES (?, ?, ?, ?)', {
-            senderPlayer.PlayerData.license,
-            targetPlayer.PlayerData.license,
+            senderPlayer.identifier,
+            targetPlayer.identifier,
             msg,
             warnId
         })
     else
-        TriggerClientEvent('QBCore:Notify', source, Lang:t("error.not_online"), 'error')
+        -- TriggerClientEvent('QBCore:Notify', source, Lang:t("error.not_online"), 'error')
     end
-end, 'admin')
+end, true)
 
-QBCore.Commands.Add('checkwarns', Lang:t("commands.check_player_warning"), {{name='id', help='Player'}, {name='Warning', help='Number of warning, (1, 2 or 3 etc..)'}}, false, function(source, args)
-    if args[2] == nil then
-        local targetPlayer = QBCore.Functions.GetPlayer(tonumber(args[1]))
-        local result = MySQL.Sync.fetchAll('SELECT * FROM player_warns WHERE targetIdentifier = ?', { targetPlayer.PlayerData.license })
-        TriggerClientEvent('chat:addMessage', source, 'SYSTEM', 'warning', targetPlayer.PlayerData.name..' has '..tablelength(result)..' warnings!')
+RegisterCommand('checkwarns', function(source, args)
+    if not args[2] then
+        local targetPlayer = ESX.GetPlayerFromId(tonumber(args[1]))
+        local result = MySQL.Sync.fetchAll('SELECT * FROM player_warns WHERE targetIdentifier = ?', { targetPlayer.identifier })
+        TriggerClientEvent('chat:addMessage', source, 'SYSTEM', 'warning', targetPlayer.getName() ..' has '..tablelength(result)..' warnings!')
     else
-        local targetPlayer = QBCore.Functions.GetPlayer(tonumber(args[1]))
-        local warnings = MySQL.Sync.fetchAll('SELECT * FROM player_warns WHERE targetIdentifier = ?', { targetPlayer.PlayerData.license })
+        local targetPlayer = ESX.GetPlayerFromId(tonumber(args[1]))
+        local warnings = MySQL.Sync.fetchAll('SELECT * FROM player_warns WHERE targetIdentifier = ?', { targetPlayer.identifier })
         local selectedWarning = tonumber(args[2])
-        if warnings[selectedWarning] ~= nil then
-            local sender = QBCore.Functions.GetPlayer(warnings[selectedWarning].senderIdentifier)
-            TriggerClientEvent('chat:addMessage', source, 'SYSTEM', 'warning', targetPlayer.PlayerData.name..' has been warned by '..sender.PlayerData.name..', Reason: '..warnings[selectedWarning].reason)
+        if warnings[selectedWarning] then
+            local sender = ESX.GetPlayerFromIdentifier(warnings[selectedWarning].senderIdentifier)
+            TriggerClientEvent('chat:addMessage', source, 'SYSTEM', 'warning', targetPlayer.getName() ..' has been warned by '..sender.name ..', Reason: '..warnings[selectedWarning].reason)
         end
     end
-end, 'admin')
+end, true)
 
-QBCore.Commands.Add('delwarn', Lang:t("commands.delete_player_warning"), {{name='id', help='Player'}, {name='Warning', help='Number of warning, (1, 2 or 3 etc..)'}}, true, function(source, args)
-    local targetPlayer = QBCore.Functions.GetPlayer(tonumber(args[1]))
-    local warnings = MySQL.Sync.fetchAll('SELECT * FROM player_warns WHERE targetIdentifier = ?', { targetPlayer.PlayerData.license })
+RegisterCommand('delwarn', function(source, args)
+    local targetPlayer = ESX.GetPlayerFromId(tonumber(args[1]))
+    local warnings = MySQL.Sync.fetchAll('SELECT * FROM player_warns WHERE targetIdentifier = ?', { targetPlayer.identifier })
     local selectedWarning = tonumber(args[2])
-    if warnings[selectedWarning] ~= nil then
-        local sender = QBCore.Functions.GetPlayer(warnings[selectedWarning].senderIdentifier)
+    if warnings[selectedWarning] then
+        local sender = ESX.GetPlayerFromIdentifier(warnings[selectedWarning].senderIdentifier)
         TriggerClientEvent('chat:addMessage', source, 'SYSTEM', 'warning', 'You have deleted warning ('..selectedWarning..') , Reason: '..warnings[selectedWarning].reason)
         MySQL.Async.execute('DELETE FROM player_warns WHERE warnId = ?', { warnings[selectedWarning].warnId })
     end
-end, 'admin')
+end, true)
 
-QBCore.Commands.Add('reportr', Lang:t("commands.reply_to_report"), {{name='id', help='Player'}, {name = 'message', help = 'Message to respond with'}}, false, function(source, args, rawCommand)
+RegisterCommand('reportr', function(source, args, rawCommand)
     local src = source
     local playerId = tonumber(args[1])
     table.remove(args, 1)
     local msg = table.concat(args, ' ')
-    local OtherPlayer = QBCore.Functions.GetPlayer(playerId)
+    local OtherPlayer = ESX.GetPlayerFromId(playerId)
     if msg == '' then return end
-    if not OtherPlayer then return TriggerClientEvent('QBCore:Notify', src, 'Player is not online', 'error') end
-    if not QBCore.Functions.HasPermission(src, 'admin') or IsPlayerAceAllowed(src, 'command') ~= 1 then return end
+    if not OtherPlayer then return end -- TriggerClientEvent('QBCore:Notify', src, 'Player is not online', 'error') end
+    local xPlayer = ESX.GetPlayerFromId(src)
+    if not xPlayer.group == "admin" or IsPlayerAceAllowed(src, 'command') ~= 1 then return end
     TriggerClientEvent('chat:addMessage', playerId, {
         color = {255, 0, 0},
         multiline = true,
@@ -343,100 +312,98 @@ QBCore.Commands.Add('reportr', Lang:t("commands.reply_to_report"), {{name='id', 
         multiline = true,
         args = {'Report Response ('..playerId..')', msg}
     })
-    TriggerClientEvent('QBCore:Notify', src, 'Reply Sent')
-    TriggerEvent('qb-log:server:CreateLog', 'report', 'Report Reply', 'red', '**'..GetPlayerName(src)..'** replied on: **'..OtherPlayer.PlayerData.name.. ' **(ID: '..OtherPlayer.PlayerData.source..') **Message:** ' ..msg, false)
+    -- TriggerClientEvent('QBCore:Notify', src, 'Reply Sent')
+    -- TriggerEvent('qb-log:server:CreateLog', 'report', 'Report Reply', 'red', '**'..GetPlayerName(src)..'** replied on: **'..OtherPlayer.PlayerData.name.. ' **(ID: '..OtherPlayer.PlayerData.source..') **Message:** ' ..msg, false)
 end, 'admin')
 
-QBCore.Commands.Add('setmodel', Lang:t("commands.change_ped_model"), {{name='model', help='Name of the model'}, {name='id', help='Id of the Player (empty for yourself)'}}, false, function(source, args)
+RegisterCommand('setmodel',function(source, args)
     local model = args[1]
     local target = tonumber(args[2])
     if model ~= nil or model ~= '' then
         if target == nil then
-            TriggerClientEvent('qb-admin:client:SetModel', source, tostring(model))
+            TriggerClientEvent('esx-admin:client:SetModel', source, tostring(model))
         else
-            local Trgt = QBCore.Functions.GetPlayer(target)
+            local Trgt = ESX.GetPlayerFromId(target)
             if Trgt ~= nil then
-                TriggerClientEvent('qb-admin:client:SetModel', target, tostring(model))
+                TriggerClientEvent('esx-admin:client:SetModel', target, tostring(model))
             else
-                TriggerClientEvent('QBCore:Notify', source, Lang:t("error.not_online"), 'error')
+                -- TriggerClientEvent('QBCore:Notify', source, Lang:t("error.not_online"), 'error')
             end
         end
     else
-        TriggerClientEvent('QBCore:Notify', source, Lang:t("error.failed_set_model"), 'error')
+        -- TriggerClientEvent('QBCore:Notify', source, Lang:t("error.failed_set_model"), 'error')
     end
 end, 'admin')
 
-QBCore.Commands.Add('setspeed', Lang:t("commands.set_player_foot_speed"), {}, false, function(source, args)
+RegisterCommand('setspeed',function(source, args)
     local speed = args[1]
     if speed ~= nil then
-        TriggerClientEvent('qb-admin:client:SetSpeed', source, tostring(speed))
+        TriggerClientEvent('esx-admin:client:SetSpeed', source, tostring(speed))
     else
-        TriggerClientEvent('QBCore:Notify', source, Lang:t("error.failed_set_speed"), 'error')
+        -- TriggerClientEvent('QBCore:Notify', source, Lang:t("error.failed_set_speed"), 'error')
     end
 end, 'admin')
 
-QBCore.Commands.Add('reporttoggle', Lang:t("commands.report_toggle"), {}, false, function(source, args)
+RegisterCommand('reporttoggle', function(source, args)
     local src = source
     QBCore.Functions.ToggleOptin(src)
     if QBCore.Functions.IsOptin(src) then
-        TriggerClientEvent('QBCore:Notify', src, Lang:t("success.receive_reports"), 'success')
+        -- TriggerClientEvent('QBCore:Notify', src, Lang:t("success.receive_reports"), 'success')
     else
-        TriggerClientEvent('QBCore:Notify', src, Lang:t("error.no_receive_report"), 'error')
+        -- TriggerClientEvent('QBCore:Notify', src, Lang:t("error.no_receive_report"), 'error')
     end
 end, 'admin')
 
-QBCore.Commands.Add('kickall', Lang:t("commands.kick_all"), {}, false, function(source, args)
+RegisterCommand('kickall',function(source, args)
     local src = source
     if src > 0 then
         local reason = table.concat(args, ' ')
-        if QBCore.Functions.HasPermission(src, 'god') or IsPlayerAceAllowed(src, 'command') then
+        if xPlayer.group == "admin" or IsPlayerAceAllowed(src, 'command') then
             if reason and reason ~= '' then
-                for k, v in pairs(QBCore.Functions.GetPlayers()) do
-                    local Player = QBCore.Functions.GetPlayer(v)
-                    if Player then
-                        DropPlayer(Player.PlayerData.source, reason)
+                for k, xPlayer in pairs(ESX.GetExtendedPlayers()) do
+                    if xPlayer then
+                        DropPlayer(xPlayer.source, reason)
                     end
                 end
             else
-                TriggerClientEvent('QBCore:Notify', src, Lang:t("info.no_reason_specified"), 'error')
+                -- TriggerClientEvent('QBCore:Notify', src, Lang:t("info.no_reason_specified"), 'error')
             end
         end
     else
-        for k, v in pairs(QBCore.Functions.GetPlayers()) do
-            local Player = QBCore.Functions.GetPlayer(v)
+        for k, v in pairs(ESX.GetExtendedPlayers())) do
+            local Player = ESX.GetPlayerFromId(v)
             if Player then
-                DropPlayer(Player.PlayerData.source, Lang:t("info.server_restart") .. QBCore.Config.Server.Discord)
+                DropPlayer(xPlayer.source, Lang:t("info.server_restart") .. QBCore.Config.Server.Discord)
             end
         end
     end
 end, 'god')
 
-QBCore.Commands.Add('setammo', Lang:t("commands.ammo_amount_set"), {{name='amount', help='Amount of bullets, for example: 20'}, {name='weapon', help='Name of the weapen, for example: WEAPON_VINTAGEPISTOL'}}, false, function(source, args)
-    local src = source
-    local weapon = args[2]
-    local amount = tonumber(args[1])
+-- RegisterCommand('setammo', Lang:t("commands.ammo_amount_set"), {{name='amount', help='Amount of bullets, for example: 20'}, {name='weapon', help='Name of the weapen, for example: WEAPON_VINTAGEPISTOL'}}, false, function(source, args)
+--     local src = source
+--     local weapon = args[2]
+--     local amount = tonumber(args[1])
 
-    if weapon ~= nil then
-        TriggerClientEvent('qb-weapons:client:SetWeaponAmmoManual', src, weapon, amount)
-    else
-        TriggerClientEvent('qb-weapons:client:SetWeaponAmmoManual', src, 'current', amount)
-    end
-end, 'admin')
+--     if weapon ~= nil then
+--         TriggerClientEvent('qb-weapons:client:SetWeaponAmmoManual', src, weapon, amount)
+--     else
+--         TriggerClientEvent('qb-weapons:client:SetWeaponAmmoManual', src, 'current', amount)
+--     end
+-- end, 'admin')
 
 CreateThread(function()
     while true do
         local tempPlayers = {}
-        for k, v in pairs(QBCore.Functions.GetPlayers()) do
+        for k, xPlayer in pairs(ESX.GetExtendedPlayers()) do
             local targetped = GetPlayerPed(v)
-            local ped = QBCore.Functions.GetPlayer(v)
             tempPlayers[#tempPlayers + 1] = {
-                name = (ped.PlayerData.charinfo.firstname or '') .. ' ' .. (ped.PlayerData.charinfo.lastname or '') .. ' | (' .. (GetPlayerName(v) or '') .. ')',
-                id = v,
+                name = xPlayer.getName(),
+                id = xPlayer.playerId,
                 coords = GetEntityCoords(targetped),
-                cid = ped.PlayerData.charinfo.firstname .. ' ' .. ped.PlayerData.charinfo.lastname,
-                citizenid = ped.PlayerData.citizenid,
-                sources = GetPlayerPed(ped.PlayerData.source),
-                sourceplayer = ped.PlayerData.source
+                cid = xPlayer.getName(),
+                citizenid = xPlayer.identifier,
+                sources = GetPlayerPed(xPlayer.source),
+                sourceplayer = xPlayer.source
 
             }
         end

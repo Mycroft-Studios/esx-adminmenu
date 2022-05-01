@@ -4,38 +4,38 @@ local ShowNames = false
 local NetCheck1 = false
 local NetCheck2 = false
 
-CreateThread(function()
-    while true do
-        Wait(1000)
-        if NetCheck1 or NetCheck2 then
-            TriggerServerEvent('qb-admin:server:GetPlayersForBlips')
-        end
-    end
-end)
+-- CreateThread(function()
+--     while true do
+--         Wait(1000)
+--         if NetCheck1 or NetCheck2 then
+--             TriggerServerEvent('esx-admin:server:GetPlayersForBlips')
+--         end
+--     end
+-- end)
 
-RegisterNetEvent('qb-admin:client:toggleBlips', function()
-    if not ShowBlips then
-        ShowBlips = true
-        NetCheck1 = true
-        QBCore.Functions.Notify(Lang:t("success.blips_activated"), "success")
-    else
-        ShowBlips = false
-        QBCore.Functions.Notify(Lang:t("error.blips_deactivated"), "error")
-    end
-end)
+-- RegisterNetEvent('esx-admin:client:toggleBlips', function()
+--     if not ShowBlips then
+--         ShowBlips = true
+--         NetCheck1 = true
+--         QBCore.Functions.Notify(Lang:t("success.blips_activated"), "success")
+--     else
+--         ShowBlips = false
+--         QBCore.Functions.Notify(Lang:t("error.blips_deactivated"), "error")
+--     end
+-- end)
 
-RegisterNetEvent('qb-admin:client:toggleNames', function()
-    if not ShowNames then
-        ShowNames = true
-        NetCheck2 = true
-        QBCore.Functions.Notify(Lang:t("success.names_activated"), "success")
-    else
-        ShowNames = false
-        QBCore.Functions.Notify(Lang:t("error.names_deactivated"), "error")
-    end
-end)
+-- RegisterNetEvent('esx-admin:client:toggleNames', function()
+--     if not ShowNames then
+--         ShowNames = true
+--         NetCheck2 = true
+--         QBCore.Functions.Notify(Lang:t("success.names_activated"), "success")
+--     else
+--         ShowNames = false
+--         QBCore.Functions.Notify(Lang:t("error.names_deactivated"), "error")
+--     end
+-- end)
 
-RegisterNetEvent('qb-admin:client:Show', function(players)
+RegisterNetEvent('esx-admin:client:Show', function(players)
     for k, player in pairs(players) do
         local playeridx = GetPlayerFromServerId(player.id)
         local ped = GetPlayerPed(playeridx)
