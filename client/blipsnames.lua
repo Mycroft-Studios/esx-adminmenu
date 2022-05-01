@@ -1,4 +1,3 @@
-QBCore = exports['qb-core']:GetCoreObject()
 local ShowBlips = false
 local ShowNames = false
 local NetCheck1 = false
@@ -17,10 +16,10 @@ local NetCheck2 = false
 --     if not ShowBlips then
 --         ShowBlips = true
 --         NetCheck1 = true
---         QBCore.Functions.Notify(Lang:t("success.blips_activated"), "success")
+--         QBCore.Functions.Notify(_U("success.blips_activated"), "success")
 --     else
 --         ShowBlips = false
---         QBCore.Functions.Notify(Lang:t("error.blips_deactivated"), "error")
+--         QBCore.Functions.Notify(_U("error.blips_deactivated"), "error")
 --     end
 -- end)
 
@@ -28,10 +27,10 @@ local NetCheck2 = false
 --     if not ShowNames then
 --         ShowNames = true
 --         NetCheck2 = true
---         QBCore.Functions.Notify(Lang:t("success.names_activated"), "success")
+--         QBCore.Functions.Notify(_U("success.names_activated"), "success")
 --     else
 --         ShowNames = false
---         QBCore.Functions.Notify(Lang:t("error.names_deactivated"), "error")
+--         QBCore.Functions.Notify(_U("error.names_deactivated"), "error")
 --     end
 -- end)
 

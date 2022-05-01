@@ -7,8 +7,10 @@ version '1.0.0'
 ui_page 'html/index.html'
 
 shared_scripts {
+    'config.lua',
     '@es_extended/imports.lua',
-    'locales/en.lua', -- Change to the language you want
+    '@es_extended/locale.lua',
+    'locales/*.lua',
 }
 
 client_scripts {

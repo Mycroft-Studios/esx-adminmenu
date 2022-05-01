@@ -1,5 +1,4 @@
-local Translations = {
-    error = {
+Locales["en"] = {
         ["blips_deactivated"] = "Blips deactivated",
         ["names_deactivated"] = "Names deactivated",
         ["changed_perm_failed"] = "Choose a group!",
@@ -14,8 +13,6 @@ local Translations = {
         ["no_receive_report"] = "You are not receiving reports",
         ["failed_set_speed"] = "You did not set a speed.. (`fast` for super-run, `normal` for normal)",
         ["failed_set_model"] = "You did not set a model..",
-    },
-    success = {
         ["blips_activated"] = "Blips activated",
         ["names_activated"] = "Names activated",
         ["coords_copied"] = "Coordinates copied to clipboard!",
@@ -25,8 +22,6 @@ local Translations = {
         ["success_vehicle_owner"] = "The vehicle is now yours!",
         ["receive_reports"] = "You are receiving reports",
         ["sucess.entered_vehicle"] = "success Entered vehicle",
-    },
-    info = {
         ["ped_coords"] = "Ped Coordinates:",
         ["vehicle_dev_data"] = "Vehicle Developer Data:",
         ["ent_id"] = "Entity ID:",
@@ -64,8 +59,6 @@ local Translations = {
         ["warning_staff_message"] = "^8WARNING ^7 You have warned ",
         ["no_reason_specified"] = "No reason specified",
         ["server_restart"] = "Server restart, check our Discord for more information: ",
-    },
-    menu = {
         ["admin_menu"] = "Admin Menu",
         ["admin_options"] = "Admin Options",
         ["online_players"] = "Online Players",
@@ -112,8 +105,6 @@ local Translations = {
         ["open_inv"] = "Open Inventory",
         ["give_clothing_menu"] = "Give Clothing Menu",
         ["hud_dev_mode"] = "Dev Mode (qb-hud)",
-    },
-    desc = {
         ["admin_options_desc"] = "Misc. Admin Options",
         ["player_management_desc"] = "View List Of Players",
         ["server_management_desc"] = "Misc. Server Options",
@@ -147,8 +138,6 @@ local Translations = {
         ["sit_in_veh_desc2"] = "'s vehicle",
         ["clothing_menu_desc"] = "Give the Cloth menu to",
         ["hud_dev_mode_desc"] = "Enable/Disable Developer Mode",
-    },
-    time = {
         ["ban_length"] = "Ban Length",
         ["1hour"] = "1 hour",
         ["6hour"] = "6 hours",
@@ -163,8 +152,6 @@ local Translations = {
         ["permenent"] = "Permanent",
         ["self"] = "Self",
         ["changed"] = "Time changed to %{time} hs 00 min",
-    },
-    weather = {
         ["extra_sunny"] = "Extra Sunny",
         ["extra_sunny_desc"] = "I'm Melting!",
         ["clear"] = "Clear",
@@ -196,8 +183,6 @@ local Translations = {
         ["halloween"] = "Halloween",
         ["halloween_desc"] = "What Was That Noise?!",
         ["weather_changed"] = "Weather Changed To: %{value}", 
-    },
-    commands = {
         ["blips_for_player"] = "Show blips for players (Admin Only)",
         ["player_name_overhead"] = "Show player name overhead (Admin Only)", 
         ["coords_dev_command"] = "Enable coord display for development stuff (Admin Only)",
@@ -216,10 +201,4 @@ local Translations = {
         ["report_toggle"] = "Toggle Incoming Reports (Admin Only)",
         ["kick_all"] = "Kick all players",
         ["ammo_amount_set"] = "Set Your Ammo Amount (Admin Only)",
-    }
 }
-
-Lang = Locale:new({
-    phrases = Translations,
-    warnOnMissing = true
-})

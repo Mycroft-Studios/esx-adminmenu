@@ -53,13 +53,14 @@ RegisterNetEvent('esx-admin:server:kick', function(player, reason)
     local xPlayer = ESX.GetPlayerFromId(src)
     if xPlayer.group == "admin" or IsPlayerAceAllowed(src, 'command') then
         -- TriggerEvent('qb-log:server:CreateLog', 'bans', 'Player Kicked', 'red', string.format('%s was kicked by %s for %s', GetPlayerName(player.id), GetPlayerName(src), reason), true)
-        DropPlayer(player.id, Lang:t("info.kicked_server") .. ':\n' .. reason .. '\n')
+        DropPlayer(player.id, _U("kicked_server") .. ':\n' .. reason .. '\n')
     end
 end)
 
 RegisterNetEvent('esx-admin:server:ban', function(player, time, reason)
     local src = source
-    if QBCore.Functions.HasPermission(src, permissions['ban']) or IsPlayerAceAllowed(src, 'command') then
+    local xPlayer = ESX.GetPlayerFromId(src)
+    if xPlayer.group == "admin" or IsPlayerAceAllowed(src, 'command') then
         local time = tonumber(time)
         local banTime = tonumber(os.time() + time)
         if banTime > 2147483647 then
@@ -68,9 +69,9 @@ RegisterNetEvent('esx-admin:server:ban', function(player, time, reason)
         local timeTable = os.date('*t', banTime)
         MySQL.Async.insert('INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?, ?, ?, ?, ?, ?, ?)', {
             GetPlayerName(player.id),
-            QBCore.Functions.GetIdentifier(player.id, 'license'),
-            QBCore.Functions.GetIdentifier(player.id, 'discord'),
-            QBCore.Functions.GetIdentifier(player.id, 'ip'),
+            GetPlayerIdentifier(player.id, 'license:'),
+            GetPlayerIdentifier(player.id, 'discord:'),
+            GetPlayerIdentifier(player.id, 'ip:'),
             reason,
             banTime,
             GetPlayerName(src)
@@ -79,11 +80,11 @@ RegisterNetEvent('esx-admin:server:ban', function(player, time, reason)
             template = "<div class=chat-message server'><strong>ANNOUNCEMENT | {0} has been banned:</strong> {1}</div>",
             args = {GetPlayerName(player.id), reason}
         })
-        TriggerEvent('qb-log:server:CreateLog', 'bans', 'Player Banned', 'red', string.format('%s was banned by %s for %s', GetPlayerName(player.id), GetPlayerName(src), reason), true)
+        -- TriggerEvent('qb-log:server:CreateLog', 'bans', 'Player Banned', 'red', string.format('%s was banned by %s for %s', GetPlayerName(player.id), GetPlayerName(src), reason), true)
         if banTime >= 2147483647 then
-            DropPlayer(player.id, Lang:t("info.banned") .. '\n' .. reason .. Lang:t("info.ban_perm") .. QBCore.Config.Server.Discord)
+            DropPlayer(player.id, _U("banned") .. '\n' .. reason .. _U("ban_perm") .. "QBCore.Config.Server.Discord")
         else
-            DropPlayer(player.id, Lang:t("info.banned") .. '\n' .. reason .. Lang:t("info.ban_expires") .. timeTable['day'] .. '/' .. timeTable['month'] .. '/' .. timeTable['year'] .. ' ' .. timeTable['hour'] .. ':' .. timeTable['min'] .. '\n🔸 Check our Discord for more information: ' .. QBCore.Config.Server.Discord)
+            DropPlayer(player.id, _U("banned") .. '\n' .. reason .. _U("ban_expires") .. timeTable['day'] .. '/' .. timeTable['month'] .. '/' .. timeTable['year'] .. ' ' .. timeTable['hour'] .. ':' .. timeTable['min'] .. '\n🔸 Check our Discord for more information: ' .. "QBCore.Config.Server.Discord")
         end
     end
 end)
@@ -131,9 +132,9 @@ RegisterNetEvent('esx-admin:server:intovehicle', function(player)
         end
         if seat ~= -1 then
             SetPedIntoVehicle(admin,vehicle,seat)
-            -- TriggerClientEvent('QBCore:Notify', src, Lang:t("sucess.entered_vehicle"), 'success', 5000)
+            -- TriggerClientEvent('QBCore:Notify', src, _U("sucess.entered_vehicle"), 'success', 5000)
         else
-            -- TriggerClientEvent('QBCore:Notify', src, Lang:t("error.no_free_seats"), 'danger', 5000)
+            -- TriggerClientEvent('QBCore:Notify', src, _U("error.no_free_seats"), 'danger', 5000)
         end
     end
 end)
@@ -157,7 +158,7 @@ RegisterNetEvent('esx-admin:server:setPermissions', function(targetId, group)
     local TargetPlayer = ESX.GetPlayerFromId(targetId)
     if xPlayer.group == "admin" or IsPlayerAceAllowed(src, 'command') then
         TargetPlayer.setGroup(group[1].rank)
-        -- TriggerClientEvent('QBCore:Notify', targetId, Lang:t("info.rank_level")..group[1].label)
+        -- TriggerClientEvent('QBCore:Notify', targetId, _U("rank_level")..group[1].label)
     end
 end)
 
@@ -168,7 +169,7 @@ RegisterNetEvent('esx-admin:server:SendReport', function(name, targetSrc, msg)
             TriggerClientEvent('chat:addMessage', src, {
                 color = {255, 0, 0},
                 multiline = true,
-                args = {Lang:t("info.admin_report")..name..' ('..targetSrc..')', msg}
+                args = {_U("info.admin_report")..name..' ('..targetSrc..')', msg}
             })
     end
 end)
@@ -180,7 +181,7 @@ RegisterNetEvent('esx-admin:server:Staffchat:addMessage', function(name, msg)
             TriggerClientEvent('chat:addMessage', src, {
                 color = {255, 0, 0},
                 multiline = true,
-                args = {Lang:t("info.staffchat")..name, msg}
+                args = {_U("info.staffchat")..name, msg}
             })
     end
 end)
@@ -199,9 +200,9 @@ end)
 --             plate,
 --             0
 --         })
---         -- TriggerClientEvent('QBCore:Notify', src, Lang:t("success.success_vehicle_owner"), 'success', 5000)
+--         -- TriggerClientEvent('QBCore:Notify', src, _U("success.success_vehicle_owner"), 'success', 5000)
 --     else
---         -- TriggerClientEvent('QBCore:Notify', src, Lang:t("error.failed_vehicle_owner"), 'error', 3000)
+--         -- TriggerClientEvent('QBCore:Notify', src, _U("error.failed_vehicle_owner"), 'error', 3000)
 --     end
 -- end)
 
@@ -244,7 +245,7 @@ RegisterCommand('staffchat',function(source, args)
     TriggerClientEvent('esx-admin:client:SendStaffChat', -1, GetPlayerName(source), msg)
 end, true)
 
-RegisterCommand('warn", function(source, args)
+RegisterCommand("warn", function(source, args)
     local targetPlayer = ESX.GetPlayerFromId(tonumber(args[1]))
     local senderPlayer = ESX.GetPlayerFromId(source)
     table.remove(args, 1)
@@ -252,8 +253,8 @@ RegisterCommand('warn", function(source, args)
     local myName = senderPlayer.getName()
     local warnId = 'WARN-'..math.random(1111, 9999)
     if targetPlayer ~= nil then
-		TriggerClientEvent('chat:addMessage', targetPlayer.source, { args = { "SYSTEM", Lang:t("info.warning_chat_message")..GetPlayerName(source).."," .. Lang:t("info.reason") .. ": "..msg }, color = 255, 0, 0 })
-		TriggerClientEvent('chat:addMessage', source, { args = { "SYSTEM", Lang:t("info.warning_staff_message")..GetPlayerName(targetPlayer.source)..", for: "..msg }, color = 255, 0, 0 })
+		TriggerClientEvent('chat:addMessage', targetPlayer.source, { args = { "SYSTEM", _U("warning_chat_message")..GetPlayerName(source).."," .. _U("reason") .. ": "..msg }, color = 255, 0, 0 })
+		TriggerClientEvent('chat:addMessage', source, { args = { "SYSTEM", _U("warning_staff_message")..GetPlayerName(targetPlayer.source)..", for: "..msg }, color = 255, 0, 0 })
         MySQL.Async.insert('INSERT INTO player_warns (senderIdentifier, targetIdentifier, reason, warnId) VALUES (?, ?, ?, ?)', {
             senderPlayer.identifier,
             targetPlayer.identifier,
@@ -261,7 +262,7 @@ RegisterCommand('warn", function(source, args)
             warnId
         })
     else
-        -- TriggerClientEvent('QBCore:Notify', source, Lang:t("error.not_online"), 'error')
+        -- TriggerClientEvent('QBCore:Notify', source, _U("error.not_online"), 'error')
     end
 end, true)
 
@@ -314,7 +315,7 @@ RegisterCommand('reportr', function(source, args, rawCommand)
     })
     -- TriggerClientEvent('QBCore:Notify', src, 'Reply Sent')
     -- TriggerEvent('qb-log:server:CreateLog', 'report', 'Report Reply', 'red', '**'..GetPlayerName(src)..'** replied on: **'..OtherPlayer.PlayerData.name.. ' **(ID: '..OtherPlayer.PlayerData.source..') **Message:** ' ..msg, false)
-end, 'admin')
+end, true)
 
 RegisterCommand('setmodel',function(source, args)
     local model = args[1]
@@ -327,32 +328,22 @@ RegisterCommand('setmodel',function(source, args)
             if Trgt ~= nil then
                 TriggerClientEvent('esx-admin:client:SetModel', target, tostring(model))
             else
-                -- TriggerClientEvent('QBCore:Notify', source, Lang:t("error.not_online"), 'error')
+                -- TriggerClientEvent('QBCore:Notify', source, _U("error.not_online"), 'error')
             end
         end
     else
-        -- TriggerClientEvent('QBCore:Notify', source, Lang:t("error.failed_set_model"), 'error')
+        -- TriggerClientEvent('QBCore:Notify', source, _U("error.failed_set_model"), 'error')
     end
-end, 'admin')
+end, true)
 
 RegisterCommand('setspeed',function(source, args)
     local speed = args[1]
     if speed ~= nil then
         TriggerClientEvent('esx-admin:client:SetSpeed', source, tostring(speed))
     else
-        -- TriggerClientEvent('QBCore:Notify', source, Lang:t("error.failed_set_speed"), 'error')
+        -- TriggerClientEvent('QBCore:Notify', source, _U("error.failed_set_speed"), 'error')
     end
-end, 'admin')
-
-RegisterCommand('reporttoggle', function(source, args)
-    local src = source
-    QBCore.Functions.ToggleOptin(src)
-    if QBCore.Functions.IsOptin(src) then
-        -- TriggerClientEvent('QBCore:Notify', src, Lang:t("success.receive_reports"), 'success')
-    else
-        -- TriggerClientEvent('QBCore:Notify', src, Lang:t("error.no_receive_report"), 'error')
-    end
-end, 'admin')
+end, true)
 
 RegisterCommand('kickall',function(source, args)
     local src = source
@@ -366,20 +357,20 @@ RegisterCommand('kickall',function(source, args)
                     end
                 end
             else
-                -- TriggerClientEvent('QBCore:Notify', src, Lang:t("info.no_reason_specified"), 'error')
+                -- TriggerClientEvent('QBCore:Notify', src, _U("no_reason_specified"), 'error')
             end
         end
     else
-        for k, v in pairs(ESX.GetExtendedPlayers())) do
+        for k, v in pairs(ESX.GetExtendedPlayers()) do
             local Player = ESX.GetPlayerFromId(v)
             if Player then
-                DropPlayer(xPlayer.source, Lang:t("info.server_restart") .. QBCore.Config.Server.Discord)
+                DropPlayer(xPlayer.source, _U("server_restart") .. "")
             end
         end
     end
-end, 'god')
+end, true)
 
--- RegisterCommand('setammo', Lang:t("commands.ammo_amount_set"), {{name='amount', help='Amount of bullets, for example: 20'}, {name='weapon', help='Name of the weapen, for example: WEAPON_VINTAGEPISTOL'}}, false, function(source, args)
+-- RegisterCommand('setammo', _U("commands.ammo_amount_set"), {{name='amount', help='Amount of bullets, for example: 20'}, {name='weapon', help='Name of the weapen, for example: WEAPON_VINTAGEPISTOL'}}, false, function(source, args)
 --     local src = source
 --     local weapon = args[2]
 --     local amount = tonumber(args[1])
